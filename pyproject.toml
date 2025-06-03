@@ -1,0 +1,19 @@
+[project]
+name = "ai-4190-408-final-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "einops>=0.8.1",
+    "gdown>=5.2.0",
+    "matplotlib>=3.10.3",
+    "pyyaml>=6.0.2",
+    "scikit-learn>=1.6.1",
+    "standard-imghdr>=3.13.0",
+    "tensorboard>=2.19.0",
+    "torch>=2.7.0",
+    "torch-tb-profiler>=0.4.3",
+    "torchvision>=0.22.0",
+    "tqdm>=4.67.1",
+]

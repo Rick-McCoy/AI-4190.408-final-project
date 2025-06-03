@@ -5,9 +5,9 @@ output_base_dir: "runs_vae" # Base directory for all outputs
 dataset:
   name: "CelebA" # Or others if you extend later
   root_dir: "./data" # Where to download/store CelebA
-  image_size: 64 # e.g., 64, 128
+  image_size: 128 # e.g., 64, 128
   center_crop_size: 140 # Size for center cropping before resizing (e.g., 140 for 178 CelebA images)
-  batch_size: 64
+  batch_size: 256
   num_workers: 4
   pin_memory: true
   split_ratios: # Used if dataset doesn't have predefined splits or to override
@@ -23,13 +23,8 @@ model:
   # For a simple CNN VAE, define channels. Example for 64x64 input:
   # Encoder: 3 -> 32 -> 64 -> 128 -> 256 (followed by flatten & FCs to latent_dim)
   # Decoder: latent_dim -> FCs to 256 * 4 * 4 -> Reshape -> 256 -> 128 -> 64 -> 32 -> 3
-  encoder_channels: [3, 32, 64, 128, 256] # Input channels (3 for RGB) followed by conv layer output channels
-  decoder_channels: [256, 128, 64, 32, 3] # Channels for ConvTranspose layers, ending in output channels (3 for RGB)
-  # Note: The transition from conv to latent and latent to conv needs to be handled carefully.
-  # We'll likely calculate the flattened size dynamically.
-  kernel_size: 4
-  stride: 2
-  padding: 1
+  encoder_channels: [3, 32, 64, 128, 256, 512] # Input channels (3 for RGB) followed by conv layer output channels
+  decoder_channels: [512, 256, 128, 64, 32, 3] # Channels for ConvTranspose layers, ending in output channels (3 for RGB)
   use_batch_norm: true
   activation: "relu" # "relu", "leaky_relu"
 
@@ -40,8 +35,8 @@ training:
   optimizer: "Adam" # Adam, SGD, etc.
   adam_betas: [0.5, 0.999] # Common for GANs/VAEs
   weight_decay: 0.0
-  # kl_beta: 1.0 # Weight for KL divergence term (can be annealed)
-  # kl_anneal_epochs: 0 # Number of epochs to anneal beta from 0 to kl_beta
+  kl_beta: 1.0 # Weight for KL divergence term (can be annealed)
+  kl_anneal_epochs: 10 # Number of epochs to anneal beta from 0 to kl_beta
   scheduler: # Optional
     name: null # e.g., "ReduceLROnPlateau" or "StepLR"
     # ReduceLROnPlateau specific:
@@ -55,7 +50,7 @@ training:
 # --- Logging & Visualization ---
 logging:
   log_level: "INFO" # DEBUG, INFO, WARNING, ERROR
-  tensorboard_log_freq_images: 5 # Log images to TensorBoard every N epochs
+  tensorboard_log_freq_images: 1 # Log images to TensorBoard every N epochs
   console_log_freq_metrics: 100 # Log metrics to console every N batches (if not using tqdm for batches)
 
 visualization:
