@@ -42,7 +42,7 @@ def vae_loss_function(
     logvar: Tensor,
     kl_beta: float,
 ) -> Tuple[Tensor, Tensor, Tensor]:
-    recon_loss = F.l1_loss(recon_x, x, reduction="none")
+    recon_loss = F.mse_loss(recon_x, x, reduction="none")
     recon_loss = reduce(recon_loss, "b c h w -> b", "sum").mean()
 
     # KL divergence
@@ -120,9 +120,9 @@ def validate_epoch(
     kl_beta: float,
 ):
     model.eval()
-    total_loss_epoch = 0
-    recon_loss_epoch = 0
-    kld_loss_epoch = 0
+    loss_list = []
+    recon_loss_list = []
+    kld_loss_list = []
 
     progress_bar = tqdm(
         dataloader,
@@ -143,9 +143,9 @@ def validate_epoch(
                 recon_images, images, mu, logvar, kl_beta
             )
 
-            total_loss_epoch += loss.item()
-            recon_loss_epoch += recon_loss.item()
-            kld_loss_epoch += kld_loss.item()
+            loss_list.append(loss.item())
+            recon_loss_list.append(recon_loss.item())
+            kld_loss_list.append(kld_loss.item())
 
             progress_bar.set_postfix(
                 {
@@ -155,9 +155,9 @@ def validate_epoch(
                 }
             )
 
-    avg_total_loss = total_loss_epoch / len(dataloader.dataset)
-    avg_recon_loss = recon_loss_epoch / len(dataloader.dataset)
-    avg_kld_loss = kld_loss_epoch / len(dataloader.dataset)
+    avg_total_loss = sum(loss_list) / len(loss_list)
+    avg_recon_loss = sum(recon_loss_list) / len(recon_loss_list)
+    avg_kld_loss = sum(kld_loss_list) / len(kld_loss_list)
 
     writer.add_scalar("Val/loss", avg_total_loss, epoch)
     writer.add_scalar("Val/recon_loss", avg_recon_loss, epoch)
